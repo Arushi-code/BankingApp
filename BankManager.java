@@ -1,13 +1,18 @@
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BankManager {
     private List<Account> accounts;
-    private static final String FILE_NAME = "accounts.dat";
+    private List<Transaction> transactions;
+    private static final String ACCOUNTS_FILE = "accounts.dat";
+    private static final String TRANSACTIONS_FILE = "transactions.dat";
 
     public BankManager() {
         accounts = new ArrayList<>();
+        transactions = new ArrayList<>();
         loadAccounts();
+        loadTransactions();
     }
 
     public void createAccount(String accNum, String holder, double initialDeposit, String pin)
@@ -20,7 +25,11 @@ public class BankManager {
         }
         Account account = new Account(accNum, holder, initialDeposit, pin);
         accounts.add(account);
+        if (initialDeposit > 0) {
+            transactions.add(new Transaction("DEPOSIT", initialDeposit, initialDeposit));
+        }
         saveAccounts();
+        saveTransactions();
     }
 
     public Account login(String accNum, String pin) {
@@ -36,7 +45,9 @@ public class BankManager {
             throw new InvalidAmountException("Deposit amount must be positive.");
         }
         account.setBalance(account.getBalance() + amount);
+        transactions.add(new Transaction("DEPOSIT", amount, account.getBalance()));
         saveAccounts();
+        saveTransactions();
     }
 
     public void withdraw(Account account, double amount)
@@ -49,7 +60,9 @@ public class BankManager {
                     "Insufficient funds. Available: ₹" + String.format("%.2f", account.getBalance()));
         }
         account.setBalance(account.getBalance() - amount);
+        transactions.add(new Transaction("WITHDRAW", amount, account.getBalance()));
         saveAccounts();
+        saveTransactions();
     }
 
     public double checkBalance(Account account) {
@@ -69,22 +82,73 @@ public class BankManager {
         return new ArrayList<>(accounts);
     }
 
+    public List<Transaction> getAllTransactions() {
+        return new ArrayList<>(transactions);
+    }
+
+    public List<Transaction> getRecentTransactions(int count) {
+        int size = transactions.size();
+        int start = Math.max(0, size - count);
+        return new ArrayList<>(transactions.subList(start, size));
+    }
+
+    public double getTotalDeposits() {
+        return transactions.stream()
+                .filter(t -> t.getType().equals("DEPOSIT"))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+
+    public double getTotalWithdrawals() {
+        return transactions.stream()
+                .filter(t -> t.getType().equals("WITHDRAW"))
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+    }
+
+    public int getTransactionCount() {
+        return transactions.size();
+    }
+
+    public int getAccountCount() {
+        return accounts.size();
+    }
+
     private void saveAccounts() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ACCOUNTS_FILE))) {
             oos.writeObject(accounts);
         } catch (IOException e) {
             System.out.println("Error saving accounts: " + e.getMessage());
         }
     }
 
+    private void saveTransactions() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(TRANSACTIONS_FILE))) {
+            oos.writeObject(transactions);
+        } catch (IOException e) {
+            System.out.println("Error saving transactions: " + e.getMessage());
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void loadAccounts() {
-        File file = new File(FILE_NAME);
+        File file = new File(ACCOUNTS_FILE);
         if (!file.exists()) return;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             accounts = (List<Account>) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Error loading accounts: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void loadTransactions() {
+        File file = new File(TRANSACTIONS_FILE);
+        if (!file.exists()) return;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            transactions = (List<Transaction>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Error loading transactions: " + e.getMessage());
         }
     }
 }
