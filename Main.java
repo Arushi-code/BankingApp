@@ -141,7 +141,8 @@ public class Main {
         while (true) {
             try {
                 System.out.print(prompt);
-                int value = Integer.parseInt(sc.nextLine().trim());
+                String input = sc.nextLine().trim().replaceAll("[^\\d]", "");
+                int value = Integer.parseInt(input);
                 return value;
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid number.");
@@ -153,7 +154,8 @@ public class Main {
         while (true) {
             try {
                 System.out.print(prompt);
-                double value = Double.parseDouble(sc.nextLine().trim());
+                String input = sc.nextLine().trim().replaceAll("[^\\d.]", "");
+                double value = Double.parseDouble(input);
                 return value;
             } catch (NumberFormatException e) {
                 System.out.println("Please enter a valid amount.");
