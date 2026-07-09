@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
 public class DashboardWindow extends JFrame {
     private BankManager bank;
@@ -8,107 +9,141 @@ public class DashboardWindow extends JFrame {
     public DashboardWindow(BankManager bank, Account account) {
         this.bank = bank;
         this.account = account;
-        JFrame frame = UIHelper.createFrame("Dashboard", 600, 500);
+        JFrame frame = UIHelper.createFrame("SecureBank - Dashboard", 650, 550);
         frame.setLayout(new BorderLayout());
 
         // Header
-        JPanel header = new JPanel() {
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0, 0, UIHelper.PRIMARY, getWidth(), 0, UIHelper.PRIMARY_DARK);
-                g2d.setPaint(gp);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-            }
-        };
-        header.setPreferredSize(new Dimension(0, 100));
-        header.setLayout(new BorderLayout());
-        header.setBorder(BorderFactory.createEmptyBorder(15, 25, 15, 25));
+        JPanel header = UIHelper.createDashboardHeader(
+                "\uD83C\uDFE6", "DASHBOARD",
+                "Welcome back, " + account.getAccountHolder());
 
-        JLabel welcomeLabel = new JLabel("\uD83C\uDFE6  Welcome, " + account.getAccountHolder());
-        welcomeLabel.setFont(UIHelper.getFont(Font.BOLD, 24));
-        welcomeLabel.setForeground(Color.WHITE);
-
-        JLabel accLabel = new JLabel("Account: " + account.getAccountNumber());
-        accLabel.setFont(UIHelper.getFont(Font.PLAIN, 14));
-        accLabel.setForeground(new Color(200, 220, 255));
-
-        JPanel labelPanel = new JPanel(new GridLayout(2, 1));
-        labelPanel.setOpaque(false);
-        labelPanel.add(welcomeLabel);
-        labelPanel.add(accLabel);
-
-        JButton logoutBtn = UIHelper.createButton("Logout", UIHelper.DANGER);
+        JButton logoutBtn = UIHelper.createSmallButton("Logout", UIHelper.DANGER);
         logoutBtn.addActionListener(e -> {
             frame.dispose();
             new LoginWindow(bank);
         });
 
-        header.add(labelPanel, BorderLayout.CENTER);
         header.add(logoutBtn, BorderLayout.EAST);
         frame.add(header, BorderLayout.NORTH);
 
         // Balance Card
-        JPanel balanceCard = UIHelper.createCard();
+        JPanel balanceSection = new JPanel(new BorderLayout());
+        balanceSection.setBackground(UIHelper.BG);
+        balanceSection.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
+
+        JPanel balanceCard = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(0, 0, new Color(46, 160, 67), getWidth(), getHeight(), new Color(36, 130, 52));
+                g2d.setPaint(gp);
+                g2d.fillRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 18, 18);
+            }
+        };
+        balanceCard.setOpaque(false);
+        balanceCard.setPreferredSize(new Dimension(0, 100));
         balanceCard.setLayout(new BorderLayout());
-        balanceCard.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(15, 20, 5, 20),
-                new javax.swing.border.LineBorder(UIHelper.TABLE_BORDER, 1, true)));
+        balanceCard.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
 
-        JLabel balTitle = new JLabel("Current Balance");
+        JPanel leftInfo = new JPanel(new GridLayout(2, 1));
+        leftInfo.setOpaque(false);
+
+        JLabel balTitle = new JLabel("Available Balance");
         balTitle.setFont(UIHelper.getFont(Font.PLAIN, 14));
-        balTitle.setForeground(UIHelper.TEXT_GRAY);
+        balTitle.setForeground(new Color(220, 255, 220));
 
-        JLabel balAmount = new JLabel("₹" + String.format("%.2f", account.getBalance()));
-        balAmount.setFont(UIHelper.getFont(Font.BOLD, 32));
-        balAmount.setForeground(UIHelper.SUCCESS);
+        JLabel accLabel = new JLabel("Account: " + account.getAccountNumber());
+        accLabel.setFont(UIHelper.getFont(Font.PLAIN, 12));
+        accLabel.setForeground(new Color(200, 240, 200));
 
-        balanceCard.add(balTitle, BorderLayout.NORTH);
-        balanceCard.add(balAmount, BorderLayout.CENTER);
+        leftInfo.add(balTitle);
+        leftInfo.add(accLabel);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(UIHelper.BG);
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 5, 20));
-        topPanel.add(balanceCard, BorderLayout.CENTER);
-        frame.add(topPanel, BorderLayout.NORTH);
+        JLabel balAmount = new JLabel("\u20B9" + String.format("%.2f", account.getBalance()));
+        balAmount.setFont(UIHelper.getFont(Font.BOLD, 34));
+        balAmount.setForeground(Color.WHITE);
+        balAmount.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        // Operation Buttons
-        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 15, 15));
-        buttonPanel.setBackground(UIHelper.BG);
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 20, 20));
+        balanceCard.add(leftInfo, BorderLayout.CENTER);
+        balanceCard.add(balAmount, BorderLayout.EAST);
+        balanceSection.add(balanceCard, BorderLayout.CENTER);
+        frame.add(balanceSection, BorderLayout.NORTH);
 
-        JButton depositBtn = createOpButton("\uD83D\uDCB3", "Deposit", UIHelper.SUCCESS);
-        depositBtn.addActionListener(e -> new DepositWindow(bank, account, frame));
+        // Operations Grid
+        JPanel opsPanel = new JPanel(new GridLayout(2, 2, 18, 18));
+        opsPanel.setBackground(UIHelper.BG);
+        opsPanel.setBorder(BorderFactory.createEmptyBorder(15, 30, 25, 30));
 
-        JButton withdrawBtn = createOpButton("\uD83D\uDCB5", "Withdraw", UIHelper.WARNING);
-        withdrawBtn.addActionListener(e -> new WithdrawWindow(bank, account, frame));
+        opsPanel.add(createOpCard("\uD83D\uDCB3", "Deposit", "Add funds to your account", UIHelper.SUCCESS, e -> new DepositWindow(bank, account, frame)));
+        opsPanel.add(createOpCard("\uD83D\uDCB5", "Withdraw", "Withdraw from your account", UIHelper.WARNING, e -> new WithdrawWindow(bank, account, frame)));
+        opsPanel.add(createOpCard("\uD83D\uDCCA", "Balance", "Check your current balance", UIHelper.PRIMARY, e -> new BalanceWindow(account)));
+        opsPanel.add(createOpCard("\uD83D\uDCCB", "Details", "View account information", new Color(103, 58, 183), e -> new DetailsWindow(account)));
 
-        JButton balanceBtn = createOpButton("\uD83D\uDCCA", "Check Balance", UIHelper.PRIMARY);
-        balanceBtn.addActionListener(e -> new BalanceWindow(account));
-
-        JButton detailsBtn = createOpButton("\uD83D\uDCCB", "Account Details", new Color(103, 58, 183));
-        detailsBtn.addActionListener(e -> new DetailsWindow(account));
-
-        buttonPanel.add(depositBtn);
-        buttonPanel.add(withdrawBtn);
-        buttonPanel.add(balanceBtn);
-        buttonPanel.add(detailsBtn);
-
-        frame.add(buttonPanel, BorderLayout.CENTER);
+        frame.add(opsPanel, BorderLayout.CENTER);
         frame.setVisible(true);
     }
 
-    private JButton createOpButton(String icon, String text, Color bg) {
-        JButton btn = new JButton("<html><center><font size='5'>" + icon + "</font><br><font size='3'>" + text + "</font></center></html>");
-        btn.setFont(UIHelper.getFont(Font.BOLD, 14));
-        btn.setBackground(bg);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setPreferredSize(new Dimension(200, 120));
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setOpaque(true);
-        return btn;
+    private JPanel createOpCard(String icon, String title, String subtitle, Color bgColor, ActionListener listener) {
+        JPanel card = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setColor(UIHelper.SHADOW);
+                g2d.fillRoundRect(3, 3, getWidth() - 3, getHeight() - 3, 18, 18);
+                g2d.setColor(UIHelper.CARD_BG);
+                g2d.fillRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 18, 18);
+            }
+        };
+        card.setOpaque(false);
+        card.setLayout(new GridBagLayout());
+        card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JPanel content = new JPanel();
+        content.setOpaque(false);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+
+        JLabel iconLabel = new JLabel(icon);
+        iconLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 38));
+        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(UIHelper.getFont(Font.BOLD, 18));
+        titleLabel.setForeground(UIHelper.TEXT_DARK);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subLabel = new JLabel(subtitle);
+        subLabel.setFont(UIHelper.getFont(Font.PLAIN, 11));
+        subLabel.setForeground(UIHelper.TEXT_GRAY);
+        subLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        content.add(iconLabel);
+        content.add(Box.createVerticalStrut(8));
+        content.add(titleLabel);
+        content.add(Box.createVerticalStrut(3));
+        content.add(subLabel);
+
+        card.add(content);
+
+        // Hover effect
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.repaint();
+                card.setBorder(BorderFactory.createLineBorder(bgColor, 2, true));
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.repaint();
+                card.setBorder(BorderFactory.createEmptyBorder());
+            }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                listener.actionPerformed(null);
+            }
+        });
+
+        return card;
     }
 }

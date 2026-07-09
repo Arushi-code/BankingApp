@@ -3,34 +3,39 @@ import java.awt.*;
 
 public class DetailsWindow extends JFrame {
     public DetailsWindow(Account account) {
-        JFrame frame = UIHelper.createFrame("Account Details", 450, 320);
+        JFrame frame = UIHelper.createFrame("SecureBank - Details", 480, 380);
         frame.setLayout(new BorderLayout());
 
-        JLabel header = UIHelper.createHeader("\uD83D\uDCCB", "ACCOUNT DETAILS");
-        frame.add(header, BorderLayout.NORTH);
+        frame.add(UIHelper.createGradientHeader("\uD83D\uDCCB", "ACCOUNT DETAILS"), BorderLayout.NORTH);
 
-        JPanel mainPanel = new JPanel(new GridBagLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(UIHelper.BG);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        JPanel card = UIHelper.createCard();
+        card.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 15, 8, 15);
+        gbc.insets = new Insets(12, 15, 12, 15);
         gbc.anchor = GridBagConstraints.WEST;
 
         String[][] fields = {
-            {"Account Number", account.getAccountNumber()},
-            {"Account Holder", account.getAccountHolder()},
-            {"Balance", "₹" + String.format("%.2f", account.getBalance())}
+            {"\uD83C\uDF10  Account Number", account.getAccountNumber()},
+            {"\uD83D\uDC64  Account Holder", account.getAccountHolder()},
+            {"\uD83D\uDCB3  Current Balance", "\u20B9" + String.format("%.2f", account.getBalance())}
         };
 
         for (int i = 0; i < fields.length; i++) {
             gbc.gridx = 0; gbc.gridy = i;
-            JLabel label = UIHelper.createLabel(fields[i][0] + ":");
+            JLabel label = new JLabel(fields[i][0]);
             label.setFont(UIHelper.getFont(Font.BOLD, 14));
-            mainPanel.add(label, gbc);
+            label.setForeground(UIHelper.TEXT_GRAY);
+            card.add(label, gbc);
 
             gbc.gridx = 1;
             JLabel value = new JLabel(fields[i][1]);
-            value.setFont(UIHelper.getFont(Font.PLAIN, 14));
-            mainPanel.add(value, gbc);
+            value.setFont(UIHelper.getFont(Font.PLAIN, 15));
+            value.setForeground(UIHelper.TEXT_DARK);
+            card.add(value, gbc);
         }
 
         JButton closeBtn = UIHelper.createButton("Close", UIHelper.DANGER);
@@ -40,8 +45,9 @@ public class DetailsWindow extends JFrame {
         btnPanel.setBackground(UIHelper.BG);
         btnPanel.add(closeBtn);
 
+        mainPanel.add(card, BorderLayout.CENTER);
+        mainPanel.add(btnPanel, BorderLayout.SOUTH);
         frame.add(mainPanel, BorderLayout.CENTER);
-        frame.add(btnPanel, BorderLayout.SOUTH);
         frame.setVisible(true);
     }
 }

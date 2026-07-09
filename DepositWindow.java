@@ -10,52 +10,63 @@ public class DepositWindow extends JFrame {
         this.bank = bank;
         this.account = account;
         this.parentFrame = parentFrame;
-        JFrame frame = UIHelper.createFrame("Deposit", 450, 350);
+        JFrame frame = UIHelper.createFrame("SecureBank - Deposit", 480, 400);
         frame.setLayout(new BorderLayout());
 
-        JLabel header = UIHelper.createHeader("\uD83D\uDCB3", "DEPOSIT");
-        frame.add(header, BorderLayout.NORTH);
+        frame.add(UIHelper.createGradientHeader("\uD83D\uDCB3", "DEPOSIT"), BorderLayout.NORTH);
 
-        JPanel mainPanel = new JPanel(new GridBagLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(UIHelper.BG);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        // Form Card
+        JPanel formCard = UIHelper.createCard();
+        formCard.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
 
+        JLabel titleLabel = new JLabel("Enter Deposit Amount");
+        titleLabel.setFont(UIHelper.getFont(Font.BOLD, 16));
+        titleLabel.setForeground(UIHelper.TEXT_DARK);
+
         JTextField amountField = UIHelper.createTextField(15);
+        amountField.setPreferredSize(new Dimension(250, 42));
+
         JLabel statusLabel = new JLabel(" ");
         statusLabel.setFont(UIHelper.getFont(Font.PLAIN, 12));
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
 
         gbc.gridx = 0; gbc.gridy = 0;
-        mainPanel.add(UIHelper.createLabel("Enter Amount (₹):"), gbc);
+        formCard.add(titleLabel, gbc);
         gbc.gridy = 1;
-        mainPanel.add(amountField, gbc);
+        formCard.add(amountField, gbc);
         gbc.gridy = 2;
-        mainPanel.add(statusLabel, gbc);
+        formCard.add(statusLabel, gbc);
 
+        // Buttons
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        btnPanel.setBackground(UIHelper.BG);
+        btnPanel.setBackground(UIHelper.CARD_BG);
 
         JButton depositBtn = UIHelper.createButton("Deposit", UIHelper.SUCCESS);
         depositBtn.addActionListener(e -> {
             String input = amountField.getText().trim().replaceAll("[^\\d.]", "");
             if (input.isEmpty()) {
                 statusLabel.setForeground(UIHelper.DANGER);
-                statusLabel.setText("Please enter an amount!");
+                statusLabel.setText("\u274C  Please enter an amount!");
                 return;
             }
             try {
                 double amount = Double.parseDouble(input);
                 bank.deposit(account, amount);
                 statusLabel.setForeground(UIHelper.SUCCESS);
-                statusLabel.setText("Deposited ₹" + String.format("%.2f", amount) + "!");
+                statusLabel.setText("\u2705  Deposited \u20B9" + String.format("%.2f", amount) + " successfully!");
                 amountField.setText("");
                 parentFrame.repaint();
             } catch (InvalidAmountException ex) {
                 statusLabel.setForeground(UIHelper.DANGER);
-                statusLabel.setText(ex.getMessage());
+                statusLabel.setText("\u274C  " + ex.getMessage());
             }
         });
 
@@ -66,8 +77,9 @@ public class DepositWindow extends JFrame {
         btnPanel.add(closeBtn);
 
         gbc.gridy = 3;
-        mainPanel.add(btnPanel, gbc);
+        formCard.add(btnPanel, gbc);
 
+        mainPanel.add(formCard, BorderLayout.CENTER);
         frame.add(mainPanel, BorderLayout.CENTER);
         frame.setVisible(true);
     }
