@@ -200,7 +200,6 @@ This project demonstrates practical knowledge of:
 
 - GitHub: https://github.com/Arushi-code
 - LinkedIn: https://www.linkedin.com/in/aarushi-jha-641821337
-- Email: aarushijha12@gmail.com
 
 ---
 
