@@ -46,7 +46,7 @@ public class BankManager {
         }
         if (amount > account.getBalance()) {
             throw new InsufficientFundsException(
-                    "Insufficient funds. Available: $" + String.format("%.2f", account.getBalance()));
+                    "Insufficient funds. Available: ₹" + String.format("%.2f", account.getBalance()));
         }
         account.setBalance(account.getBalance() - amount);
         saveAccounts();

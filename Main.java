@@ -66,7 +66,7 @@ public class Main {
         String accNum = sc.nextLine().trim();
         System.out.print("Account Holder Name: ");
         String name = sc.nextLine().trim();
-        System.out.print("Initial Deposit: $");
+        System.out.print("Initial Deposit: ₹");
         double deposit = getDoubleInput("");
         System.out.print("Set PIN: ");
         String pin = sc.nextLine().trim();
@@ -96,12 +96,12 @@ public class Main {
 
     private static void deposit() {
         System.out.println("\n--- Deposit ---");
-        System.out.print("Amount to deposit: $");
+        System.out.print("Amount to deposit: ₹");
         double amount = getDoubleInput("");
         try {
             bank.deposit(currentAccount, amount);
-            System.out.println("Deposited $" + String.format("%.2f", amount) + " successfully!");
-            System.out.println("New Balance: $" + String.format("%.2f", currentAccount.getBalance()));
+            System.out.println("Deposited ₹" + String.format("%.2f", amount) + " successfully!");
+            System.out.println("New Balance: ₹" + String.format("%.2f", currentAccount.getBalance()));
         } catch (InvalidAmountException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -109,12 +109,12 @@ public class Main {
 
     private static void withdraw() {
         System.out.println("\n--- Withdraw ---");
-        System.out.print("Amount to withdraw: $");
+        System.out.print("Amount to withdraw: ₹");
         double amount = getDoubleInput("");
         try {
             bank.withdraw(currentAccount, amount);
-            System.out.println("Withdrew $" + String.format("%.2f", amount) + " successfully!");
-            System.out.println("New Balance: $" + String.format("%.2f", currentAccount.getBalance()));
+            System.out.println("Withdrew ₹" + String.format("%.2f", amount) + " successfully!");
+            System.out.println("New Balance: ₹" + String.format("%.2f", currentAccount.getBalance()));
         } catch (InsufficientFundsException e) {
             System.out.println("Error: " + e.getMessage());
         } catch (InvalidAmountException e) {
@@ -124,7 +124,7 @@ public class Main {
 
     private static void checkBalance() {
         System.out.println("\n--- Balance ---");
-        System.out.println("Current Balance: $" + String.format("%.2f", bank.checkBalance(currentAccount)));
+        System.out.println("Current Balance: ₹" + String.format("%.2f", bank.checkBalance(currentAccount)));
     }
 
     private static void viewDetails() {

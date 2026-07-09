@@ -37,7 +37,7 @@ public class Account implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Account: %s | Holder: %s | Balance: $%.2f",
+        return String.format("Account: %s | Holder: %s | Balance: ₹%.2f",
                 accountNumber, accountHolder, balance);
     }
 }
